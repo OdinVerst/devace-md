@@ -4,6 +4,8 @@ const gulp = require('gulp');
 const browserSync = require('browser-sync').create();
 const sass = require('gulp-sass');
 const del = require('del');
+const concat = require('gulp-concat');
+const minify = require('gulp-minify');
 
 gulp.task('browser-sync', function() {
     browserSync.init({
@@ -19,17 +21,32 @@ gulp.task('sass', function () {
         .pipe(gulp.dest('./build/css'));
 });
 
-gulp.task('watch', function() {
+gulp.task('concat_js', function() {
+    //An array of files is required for the correct order of contact
+    return gulp.src(['./src/js/**/*.js']) //file array need for
+        .pipe(concat('all.js'))
+        .pipe(minify({
+            ext:{
+                src:'',
+                min:'.min.js'
+            },
+            noSource: false}))
+        .pipe(gulp.dest('./build/js'));
+});
 
-    // Watch .scss files
+
+gulp.task('watch', function() {
     gulp.watch('./src/scss/**/*.scss', gulp.series('sass'));
+    gulp.watch('./src/js/**/*.js', gulp.series('concat_js'));
 
 });
+
+
 
 gulp.task('clean', function() {
     return del(['build/css']);
 });
 
 gulp.task('default', gulp.series(
-    'sass', 'browser-sync','watch'
+    'sass','concat_js', 'browser-sync','watch'
 ));
